@@ -167,17 +167,6 @@ export default function BoardPage() {
                 Post
               </Button>
             )}
-            <button
-              onClick={() => setIsCoach((v) => !v)}
-              className={cn(
-                "text-[10px] font-semibold px-2 py-1 rounded-md border transition-colors",
-                isCoach
-                  ? "border-primary/40 bg-primary/10 text-primary"
-                  : "border-border text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {isCoach ? "Coach Mode" : "Switch to Coach"}
-            </button>
           </div>
         </div>
       </header>
