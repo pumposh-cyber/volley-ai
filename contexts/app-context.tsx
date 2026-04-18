@@ -6,6 +6,7 @@ import {
   useReducer,
   useEffect,
   useRef,
+  useState,
   type ReactNode,
 } from "react"
 import type {
@@ -326,26 +327,31 @@ export function useApp(): AppContextValue {
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE)
-  const hydrated = useRef(false)
+  const hydrationGuard = useRef(false)
+  const [hasHydrated, setHasHydrated] = useState(false)
 
   // Hydrate from localStorage on first mount
   useEffect(() => {
-    if (hydrated.current) return
-    hydrated.current = true
+    if (hydrationGuard.current) return
+    hydrationGuard.current = true
     const saved = loadState()
     if (saved) {
       dispatch({ type: "HYDRATE", payload: saved })
     }
+    setHasHydrated(true)
   }, [])
 
-  // Auto-save on every state change (after hydration)
+  // Auto-save on every state change — only after hydration to avoid
+  // overwriting localStorage with the blank INITIAL_STATE before HYDRATE fires.
   useEffect(() => {
-    if (!hydrated.current) return
+    if (!hasHydrated) return
     saveState(state)
-  }, [state])
+  }, [state, hasHydrated])
 
-  // Ensure a current match exists for the active team
+  // Ensure a current match exists for the active team — but only after
+  // hydration, otherwise this fires before HYDRATE and resets the live score.
   useEffect(() => {
+    if (!hasHydrated) return
     if (!state.activeTeamId) return
     if (!state.currentMatch || state.currentMatch.teamId !== state.activeTeamId) {
       dispatch({
@@ -353,9 +359,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         payload: { teamId: state.activeTeamId, opponentName: "Opponent TBD" },
       })
     }
-  // Only run when active team changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.activeTeamId])
+  }, [state.activeTeamId, hasHydrated])
 
   const activeTeam = state.teams.find((t) => t.id === state.activeTeamId) ?? null
   const activePlayers = state.players.filter((p) => p.teamId === state.activeTeamId)

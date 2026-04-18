@@ -9,6 +9,8 @@ import { CourtRotation } from "@/components/court-rotation"
 import { PlayerStatsPanel } from "@/components/player-stats-panel"
 import { TodaysMatches } from "@/components/todays-matches"
 import { LiveSchedule } from "@/components/live-schedule"
+import { VenueGuide } from "@/components/venue-guide"
+import { TripQuickReference } from "@/components/trip-quick-reference"
 import {
   ArrowLeft,
   Volleyball,
@@ -19,7 +21,8 @@ import {
   Calendar,
   Sparkles,
   Share2,
-  Bell,
+  MapPin,
+  Luggage,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -94,36 +97,32 @@ export default function GameDayPage() {
 
       {/* Main tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-        <TabsList className="sticky top-[calc(56px+36px)] z-30 w-full rounded-none border-b border-border bg-card grid grid-cols-4 h-12">
-          <TabsTrigger
-            value="score"
-            className={cn("gap-1.5 text-xs data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full")}
-          >
-            <Trophy className="w-4 h-4" />
-            Score
-          </TabsTrigger>
-          <TabsTrigger
-            value="rotation"
-            className={cn("gap-1.5 text-xs data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full")}
-          >
-            <RotateCw className="w-4 h-4" />
-            Rotation
-          </TabsTrigger>
-          <TabsTrigger
-            value="stats"
-            className={cn("gap-1.5 text-xs data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full")}
-          >
-            <BarChart3 className="w-4 h-4" />
-            Stats
-          </TabsTrigger>
-          <TabsTrigger
-            value="schedule"
-            className={cn("gap-1.5 text-xs data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full")}
-          >
-            <Calendar className="w-4 h-4" />
-            Schedule
-          </TabsTrigger>
-        </TabsList>
+        {/* Horizontally scrollable tab bar for 6 tabs on mobile */}
+        <div className="sticky top-[calc(56px+36px)] z-30 bg-card border-b border-border overflow-x-auto scrollbar-hide">
+          <TabsList className="w-max min-w-full rounded-none bg-transparent h-12 flex px-0 gap-0">
+            {[
+              { value: "score",    icon: Trophy,   label: "Score"    },
+              { value: "rotation", icon: RotateCw, label: "Rotation" },
+              { value: "stats",    icon: BarChart3, label: "Stats"   },
+              { value: "schedule", icon: Calendar, label: "Schedule" },
+              { value: "venue",    icon: MapPin,   label: "Venue"    },
+              { value: "trip",     icon: Luggage,  label: "Trip"     },
+            ].map(({ value, icon: Icon, label }) => (
+              <TabsTrigger
+                key={value}
+                value={value}
+                className={cn(
+                  "flex items-center gap-1.5 text-xs px-4 shrink-0",
+                  "data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary",
+                  "rounded-none h-full border-b-2 border-transparent"
+                )}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                {label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
 
         <div className="flex-1 overflow-y-auto">
           <TabsContent value="score" className="p-4 mt-0 focus-visible:outline-none">
@@ -145,6 +144,14 @@ export default function GameDayPage() {
 
           <TabsContent value="schedule" className="p-4 mt-0 focus-visible:outline-none">
             <LiveSchedule />
+          </TabsContent>
+
+          <TabsContent value="venue" className="p-4 mt-0 focus-visible:outline-none">
+            <VenueGuide />
+          </TabsContent>
+
+          <TabsContent value="trip" className="p-4 mt-0 focus-visible:outline-none">
+            <TripQuickReference />
           </TabsContent>
         </div>
       </Tabs>
