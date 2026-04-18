@@ -30,6 +30,7 @@ export const metadata: Metadata = {
 }
 
 import { Providers } from "@/components/providers"
+import { FeedbackButton } from "@/components/feedback-button"
 
 export default function RootLayout({
   children,
@@ -41,6 +42,7 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <Providers>
           {children}
+          <FeedbackButton />
         </Providers>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
