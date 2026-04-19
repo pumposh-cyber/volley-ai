@@ -199,16 +199,35 @@ export function LiveSchedule() {
         </div>
       </div>
 
-      {/* Match cards */}
-      {[...matches].sort((a, b) => b.startTime - a.startTime).map((match, idx) => (
-        <MatchCard
-          key={match.id}
-          match={match}
-          expanded={expandedId === match.id}
-          onExpand={() => setExpandedId(expandedId === match.id ? null : match.id)}
-          matchNumber={idx + 1}
-        />
-      ))}
+      {/* Match cards with past divider */}
+      {(() => {
+        const sorted = [...matches].sort((a, b) => b.startTime - a.startTime)
+        const isDone = (m: Match) => m.status === "win" || m.status === "loss" || m.status === "done"
+        let dividerInserted = false
+        return sorted.map((match, idx) => {
+          const showDivider = !dividerInserted && isDone(match) && (idx === 0 || !isDone(sorted[idx - 1]))
+          if (showDivider) dividerInserted = true
+          return (
+            <div key={match.id}>
+              {showDivider && (
+                <div className="flex items-center gap-3 py-1">
+                  <div className="flex-1 h-px bg-border" />
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-1">
+                    Past
+                  </span>
+                  <div className="flex-1 h-px bg-border" />
+                </div>
+              )}
+              <MatchCard
+                match={match}
+                expanded={expandedId === match.id}
+                onExpand={() => setExpandedId(expandedId === match.id ? null : match.id)}
+                matchNumber={idx + 1}
+              />
+            </div>
+          )
+        })
+      })()}
 
       {/* Pool standings */}
       {standings.length > 0 && (
