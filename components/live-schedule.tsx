@@ -200,7 +200,7 @@ export function LiveSchedule() {
       </div>
 
       {/* Match cards */}
-      {matches.map((match, idx) => (
+      {[...matches].sort((a, b) => b.startTime - a.startTime).map((match, idx) => (
         <MatchCard
           key={match.id}
           match={match}
