@@ -210,12 +210,12 @@ export function LiveSchedule() {
           return (
             <div key={match.id}>
               {showDivider && (
-                <div className="flex items-center gap-3 py-1">
-                  <div className="flex-1 h-px bg-border" />
-                  <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-1">
-                    Past
+                <div className="flex items-center gap-3 py-3">
+                  <div className="flex-1 h-px bg-muted-foreground/30" />
+                  <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground bg-muted px-3 py-1 rounded-full border border-border">
+                    ✓ Past Matches
                   </span>
-                  <div className="flex-1 h-px bg-border" />
+                  <div className="flex-1 h-px bg-muted-foreground/30" />
                 </div>
               )}
               <MatchCard
