@@ -201,7 +201,7 @@ export function LiveSchedule() {
 
       {/* Match cards with past divider */}
       {(() => {
-        const sorted = [...matches].sort((a, b) => b.startTime - a.startTime)
+        const sorted = [...matches].filter((m) => !m.isWorkTeam).sort((a, b) => b.startTime - a.startTime)
         const isDone = (m: Match) => m.status === "win" || m.status === "loss" || m.status === "done"
         let dividerInserted = false
         return sorted.map((match, idx) => {
