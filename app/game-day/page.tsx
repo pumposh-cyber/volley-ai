@@ -5,29 +5,24 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { LiveScoreTracker } from "@/components/live-score-tracker"
-import { CourtRotation } from "@/components/court-rotation"
-import { PlayerStatsPanel } from "@/components/player-stats-panel"
-import { TodaysMatches } from "@/components/todays-matches"
 import { LiveSchedule } from "@/components/live-schedule"
 import { VenueGuide } from "@/components/venue-guide"
-import { TripQuickReference } from "@/components/trip-quick-reference"
+import { TeamRankings } from "@/components/team-rankings"
 import {
   ArrowLeft,
   Volleyball,
-  Trophy,
   Megaphone,
-  BarChart3,
-  RotateCw,
+  Trophy,
   Calendar,
-  Sparkles,
-  Share2,
   MapPin,
-  Luggage,
+  Share2,
+  Sparkles,
+  BarChart3,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export default function GameDayPage() {
-  const [activeTab, setActiveTab] = useState("score")
+  const [activeTab, setActiveTab] = useState("schedule")
   const [showShareBanner, setShowShareBanner] = useState(false)
 
   const handleShare = () => {
@@ -97,22 +92,19 @@ export default function GameDayPage() {
 
       {/* Main tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-        {/* Horizontally scrollable tab bar for 6 tabs on mobile */}
         <div className="sticky top-[calc(56px+36px)] z-30 bg-card border-b border-border overflow-x-auto scrollbar-hide">
           <TabsList className="w-max min-w-full rounded-none bg-transparent h-12 flex px-0 gap-0">
             {[
-              { value: "score",    icon: Trophy,   label: "Score"    },
-              { value: "rotation", icon: RotateCw, label: "Rotation" },
-              { value: "stats",    icon: BarChart3, label: "Stats"   },
-              { value: "schedule", icon: Calendar, label: "Schedule" },
-              { value: "venue",    icon: MapPin,   label: "Venue"    },
-              { value: "trip",     icon: Luggage,  label: "Trip"     },
+              { value: "schedule", icon: Calendar,  label: "Schedule" },
+              { value: "venue",    icon: MapPin,    label: "Venue"    },
+              { value: "score",    icon: Trophy,    label: "Score"    },
+              { value: "rankings", icon: BarChart3, label: "Rankings" },
             ].map(({ value, icon: Icon, label }) => (
               <TabsTrigger
                 key={value}
                 value={value}
                 className={cn(
-                  "flex items-center gap-1.5 text-xs px-4 shrink-0",
+                  "flex items-center gap-1.5 text-xs px-5 shrink-0",
                   "data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary",
                   "rounded-none h-full border-b-2 border-transparent"
                 )}
@@ -125,23 +117,6 @@ export default function GameDayPage() {
         </div>
 
         <div className="flex-1 overflow-y-auto">
-          <TabsContent value="score" className="p-4 mt-0 focus-visible:outline-none">
-            <LiveScoreTracker
-              teamName="UVAC Urban Volleyball 15 TS"
-              opponent="LAVA West 15 Premier CA"
-            />
-            <TeamMatchupCard />
-          </TabsContent>
-
-          <TabsContent value="rotation" className="p-4 mt-0 focus-visible:outline-none">
-            <CourtRotation />
-            <RotationTip />
-          </TabsContent>
-
-          <TabsContent value="stats" className="p-4 mt-0 focus-visible:outline-none">
-            <PlayerStatsPanel />
-          </TabsContent>
-
           <TabsContent value="schedule" className="p-4 mt-0 focus-visible:outline-none">
             <LiveSchedule />
           </TabsContent>
@@ -150,13 +125,21 @@ export default function GameDayPage() {
             <VenueGuide />
           </TabsContent>
 
-          <TabsContent value="trip" className="p-4 mt-0 focus-visible:outline-none">
-            <TripQuickReference />
+          <TabsContent value="score" className="p-4 mt-0 focus-visible:outline-none">
+            <LiveScoreTracker
+              teamName="UVAC Urban Volleyball 15 TS"
+              opponent="LAVA West 15 Premier CA"
+            />
+            <TeamMatchupCard />
+          </TabsContent>
+
+          <TabsContent value="rankings" className="p-4 mt-0 focus-visible:outline-none">
+            <TeamRankings />
           </TabsContent>
         </div>
       </Tabs>
 
-      {/* Bottom CTA for new clubs */}
+      {/* Bottom CTA */}
       <div className="sticky bottom-0 z-30 bg-gradient-to-t from-card to-transparent pt-6 pb-4 px-4">
         <button
           onClick={() => {
@@ -179,11 +162,11 @@ function TeamMatchupCard() {
       <div className="grid grid-cols-2 gap-3 text-sm">
         {[
           { label: "Tournament", value: "NCVA Far Westerns Wk 2" },
-          { label: "Dates", value: "Apr 17-19, 2026" },
-          { label: "Venue", value: "RSCC 47, Reno" },
-          { label: "Division", value: "15 No Dinx" },
-          { label: "Format", value: "Best of 3 Sets" },
-          { label: "Head Coach", value: "Tamara Robertson" },
+          { label: "Dates",      value: "Apr 17-19, 2026"        },
+          { label: "Venue",      value: "RSCC 47, Reno"          },
+          { label: "Division",   value: "15 No Dinx"             },
+          { label: "Format",     value: "Best of 3 Sets"         },
+          { label: "Head Coach", value: "Tamara Robertson"       },
         ].map(({ label, value }) => (
           <div key={label}>
             <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</p>
@@ -191,18 +174,6 @@ function TeamMatchupCard() {
           </div>
         ))}
       </div>
-    </div>
-  )
-}
-
-function RotationTip() {
-  return (
-    <div className="mt-4 rounded-xl border border-primary/20 bg-primary/5 p-4">
-      <p className="text-xs font-semibold text-primary mb-1">Pro Tip</p>
-      <p className="text-sm text-muted-foreground">
-        Tap <strong className="text-foreground">Rotate</strong> after winning a sideout to shift positions clockwise.
-        Tap any player on the court to highlight them.
-      </p>
     </div>
   )
 }
