@@ -28,15 +28,15 @@ interface CoachSidebarProps {
 }
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Dashboard",  href: "/" },
-  { icon: Zap,             label: "Game Day",   href: "/game-day", badge: "LIVE", badgeColor: "bg-accent text-accent-foreground" },
-  { icon: Megaphone,       label: "Team Board", href: "/board" },
-  { icon: Users,           label: "Players",    href: "/players" },
-  { icon: Luggage,         label: "Trip Plan",  href: "/trips" },
-  { icon: Trophy,          label: "Tournaments",href: "#", badge: "3" },
-  { icon: Calendar,        label: "Schedule",   href: "#" },
-  { icon: BarChart3,       label: "Analytics",  href: "#" },
-  { icon: Settings,        label: "Settings",   href: "#" },
+  { icon: LayoutDashboard, label: "Dashboard",   href: "/",         comingSoon: false },
+  { icon: Zap,             label: "Game Day",    href: "/game-day", badge: "LIVE", badgeColor: "bg-accent text-accent-foreground", comingSoon: false },
+  { icon: Megaphone,       label: "Team Board",  href: "/board",    comingSoon: false },
+  { icon: Users,           label: "Players",     href: "/players",  comingSoon: false },
+  { icon: Luggage,         label: "Trip Plan",   href: "/trips",    comingSoon: false },
+  { icon: Trophy,          label: "Tournaments", href: "#",         comingSoon: true  },
+  { icon: Calendar,        label: "Schedule",    href: "#",         comingSoon: true  },
+  { icon: BarChart3,       label: "Analytics",   href: "#",         comingSoon: true  },
+  { icon: Settings,        label: "Settings",    href: "#",         comingSoon: true  },
 ]
 
 export function CoachSidebar({ collapsed, onToggle }: CoachSidebarProps) {
@@ -114,38 +114,48 @@ export function CoachSidebar({ collapsed, onToggle }: CoachSidebarProps) {
 
       <nav className="flex-1 p-3 space-y-1">
         {navItems.map((item) => {
-          const isActive = item.href !== "#" && (
+          const isActive = !item.comingSoon && (
             item.href === "/" ? pathname === "/" : pathname.startsWith(item.href)
           )
           const isGameDay = item.href === "/game-day"
 
-          return (
-            <Link key={item.label} href={item.href}>
-              <Button
-                variant={isActive ? "secondary" : "ghost"}
-                className={cn(
-                  "w-full justify-start gap-3 h-10",
-                  collapsed && "justify-center px-2",
-                  isActive && "bg-primary/10 text-primary hover:bg-primary/15",
-                  isGameDay && !isActive && "text-accent hover:text-accent hover:bg-accent/10",
-                )}
-              >
-                <item.icon className={cn("w-5 h-5 shrink-0", isGameDay && !isActive && "text-accent")} />
-                {!collapsed && (
-                  <>
-                    <span className="flex-1 text-left">{item.label}</span>
-                    {item.badge && (
-                      <span className={cn(
-                        "px-2 py-0.5 text-xs font-medium rounded-full",
-                        item.badgeColor ?? "bg-primary/10 text-primary"
-                      )}>
-                        {item.badge}
-                      </span>
-                    )}
-                  </>
-                )}
-              </Button>
-            </Link>
+          const btn = (
+            <Button
+              variant={isActive ? "secondary" : "ghost"}
+              disabled={item.comingSoon}
+              className={cn(
+                "w-full justify-start gap-3 h-10",
+                collapsed && "justify-center px-2",
+                isActive && "bg-primary/10 text-primary hover:bg-primary/15",
+                isGameDay && !isActive && "text-accent hover:text-accent hover:bg-accent/10",
+                item.comingSoon && "opacity-40 cursor-not-allowed",
+              )}
+            >
+              <item.icon className={cn("w-5 h-5 shrink-0", isGameDay && !isActive && "text-accent")} />
+              {!collapsed && (
+                <>
+                  <span className="flex-1 text-left">{item.label}</span>
+                  {item.comingSoon ? (
+                    <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-muted text-muted-foreground">
+                      Soon
+                    </span>
+                  ) : item.badge ? (
+                    <span className={cn(
+                      "px-2 py-0.5 text-xs font-medium rounded-full",
+                      item.badgeColor ?? "bg-primary/10 text-primary"
+                    )}>
+                      {item.badge}
+                    </span>
+                  ) : null}
+                </>
+              )}
+            </Button>
+          )
+
+          return item.comingSoon ? (
+            <div key={item.label}>{btn}</div>
+          ) : (
+            <Link key={item.label} href={item.href}>{btn}</Link>
           )
         })}
       </nav>

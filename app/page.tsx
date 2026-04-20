@@ -11,7 +11,7 @@ import { RecentActivity } from "@/components/recent-activity"
 import { QuickActions } from "@/components/quick-actions"
 import { AIChatPanel } from "@/components/ai-chat-panel"
 import { Button } from "@/components/ui/button"
-import { Zap, Trophy, RotateCw, BarChart3, ArrowRight, Sparkles, X, Megaphone } from "lucide-react"
+import { Zap, ArrowRight, Sparkles, X, Megaphone, Volleyball, Calendar, MapPin } from "lucide-react"
 
 export default function CoachDashboard() {
   const [chatOpen, setChatOpen] = useState(false)
@@ -126,25 +126,39 @@ function TeamBoardCard() {
 
 function GameDayFeatureCard() {
   return (
-    <div className="rounded-2xl border-2 border-accent/30 bg-gradient-to-br from-accent/5 to-primary/5 p-6">
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+    <div className="rounded-2xl border-2 border-accent/40 bg-gradient-to-br from-accent/8 via-primary/5 to-accent/5 p-6 relative overflow-hidden">
+      {/* Decorative volleyball in background */}
+      <div className="absolute -right-4 -top-4 text-[80px] opacity-5 select-none pointer-events-none">🏐</div>
+      <div className="absolute right-16 -bottom-6 text-[60px] opacity-5 select-none pointer-events-none rotate-12">🏐</div>
+
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 relative">
         <div className="flex items-start gap-4">
-          <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-accent/15 shrink-0">
-            <Zap className="w-6 h-6 text-accent" />
+          <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-accent/20 shrink-0 text-2xl">
+            🏐
           </div>
           <div>
-            <h2 className="text-lg font-bold text-foreground">Game Day Mode</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-bold text-foreground">Game Day Mode</h2>
+              <span className="flex items-center gap-1 text-[10px] font-bold bg-accent text-accent-foreground px-2 py-0.5 rounded-full">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-foreground opacity-75" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-accent-foreground" />
+                </span>
+                LIVE
+              </span>
+            </div>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Track live scores, manage rotations, and record player stats — all from your phone during a match.
+              Your tournament command center — live scores, match schedule, venue info & power league rankings.
             </p>
-            <div className="flex items-center gap-4 mt-3">
+            <div className="flex items-center gap-4 mt-3 flex-wrap">
               {[
-                { icon: Trophy, label: "Live scoring" },
-                { icon: RotateCw, label: "Rotation tracker" },
-                { icon: BarChart3, label: "Player stats" },
-              ].map(({ icon: Icon, label }) => (
+                { emoji: "🏆", label: "Live score" },
+                { emoji: "📅", label: "Match schedule" },
+                { emoji: "📍", label: "Venue & food" },
+                { emoji: "📊", label: "Power league" },
+              ].map(({ emoji, label }) => (
                 <div key={label} className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <Icon className="w-4 h-4 text-accent" />
+                  <span>{emoji}</span>
                   <span>{label}</span>
                 </div>
               ))}
@@ -152,8 +166,8 @@ function GameDayFeatureCard() {
           </div>
         </div>
         <Link href="/game-day">
-          <Button className="bg-accent hover:bg-accent/90 text-accent-foreground gap-2 shrink-0">
-            <Zap className="w-4 h-4" />
+          <Button className="bg-accent hover:bg-accent/90 text-accent-foreground gap-2 shrink-0 font-bold shadow-lg shadow-accent/20">
+            <Zap className="w-4 h-4 fill-current" />
             Launch Game Day
             <ArrowRight className="w-4 h-4" />
           </Button>
@@ -165,19 +179,19 @@ function GameDayFeatureCard() {
 
 function EarlyAccessCard() {
   return (
-    <div className="rounded-2xl border border-border bg-card p-8 text-center">
-      <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 mx-auto mb-4">
-        <Sparkles className="w-7 h-7 text-primary" />
-      </div>
-      <h2 className="text-2xl font-bold text-foreground mb-2">Love what you see?</h2>
+    <div className="rounded-2xl border border-border bg-gradient-to-br from-primary/5 to-accent/5 p-8 text-center relative overflow-hidden">
+      <div className="absolute left-4 top-4 text-5xl opacity-10 select-none pointer-events-none">🏐</div>
+      <div className="absolute right-4 bottom-4 text-5xl opacity-10 select-none pointer-events-none rotate-45">🏐</div>
+      <div className="text-4xl mb-3">🏆</div>
+      <h2 className="text-2xl font-bold text-foreground mb-2">Bring this to your club</h2>
       <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-        VolleyAI is the all-in-one platform for volleyball clubs — tournament management, live game tracking, team communication, and AI-powered planning. Join clubs already saving 10+ hours per tournament weekend.
+        VolleyAI is the all-in-one platform for volleyball clubs — live game tracking, tournament schedules, venue guides, power league rankings, and AI-powered planning. Coaches love it on the sideline.
       </p>
       <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
         <a href="mailto:vishalraina@gmail.com?subject=VolleyAI%20Early%20Access%20Request&body=Hi!%20I%20coach%20at%20[club%20name]%20and%20I%27m%20interested%20in%20early%20access%20to%20VolleyAI.">
           <Button size="lg" className="gap-2 bg-primary hover:bg-primary/90 px-8">
             <Sparkles className="w-4 h-4" />
-            Request Early Access
+            Get Early Access
           </Button>
         </a>
         <Link href="/game-day">
@@ -187,7 +201,7 @@ function EarlyAccessCard() {
           </Button>
         </Link>
       </div>
-      <p className="text-xs text-muted-foreground mt-4">Free during beta · No credit card required</p>
+      <p className="text-xs text-muted-foreground mt-4">Free during beta · No credit card required · 🏐 Built for coaches</p>
     </div>
   )
 }

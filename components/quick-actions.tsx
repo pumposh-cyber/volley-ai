@@ -12,45 +12,24 @@ import {
   ClipboardList,
   Download,
 } from "lucide-react"
+import { FLAGS } from "@/lib/flags"
 
 interface QuickActionsProps {
   onOpenChat: () => void
 }
 
 const actions = [
-  {
-    icon: UserPlus,
-    label: "Add Player",
-    description: "Register new player",
-  },
-  {
-    icon: CalendarPlus,
-    label: "Add Tournament",
-    description: "Schedule event",
-  },
-  {
-    icon: Send,
-    label: "Send Announcement",
-    description: "Message all teams",
-  },
-  {
-    icon: FileText,
-    label: "Generate Report",
-    description: "Season stats",
-  },
-  {
-    icon: ClipboardList,
-    label: "Create Roster",
-    description: "Tournament lineup",
-  },
-  {
-    icon: CreditCard,
-    label: "Collect Fees",
-    description: "Send invoices",
-  },
+  { icon: UserPlus,      label: "Add Player",        financial: false },
+  { icon: CalendarPlus,  label: "Add Tournament",     financial: false },
+  { icon: Send,          label: "Send Announcement",  financial: false },
+  { icon: FileText,      label: "Generate Report",    financial: false },
+  { icon: ClipboardList, label: "Create Roster",      financial: false },
+  { icon: CreditCard,    label: "Collect Fees",       financial: true  },
 ]
 
 export function QuickActions({ onOpenChat }: QuickActionsProps) {
+  const visible = actions.filter((a) => !a.financial || FLAGS.showFinancials)
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -71,7 +50,7 @@ export function QuickActions({ onOpenChat }: QuickActionsProps) {
         </Button>
 
         <div className="grid grid-cols-2 gap-2 pt-2">
-          {actions.map((action) => (
+          {visible.map((action) => (
             <Button
               key={action.label}
               variant="outline"

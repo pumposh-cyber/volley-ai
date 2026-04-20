@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Users, Trophy, Calendar, TrendingUp, DollarSign, MapPin } from "lucide-react"
+import { FLAGS } from "@/lib/flags"
 
 const stats = [
   {
@@ -10,6 +11,8 @@ const stats = [
     icon: Users,
     color: "text-primary",
     bgColor: "bg-primary/10",
+    emoji: "🏐",
+    financial: false,
   },
   {
     label: "Teams",
@@ -19,6 +22,8 @@ const stats = [
     icon: Trophy,
     color: "text-accent",
     bgColor: "bg-accent/10",
+    emoji: "🏆",
+    financial: false,
   },
   {
     label: "Upcoming Events",
@@ -28,6 +33,8 @@ const stats = [
     icon: Calendar,
     color: "text-chart-3",
     bgColor: "bg-chart-3/10",
+    emoji: "📅",
+    financial: false,
   },
   {
     label: "Win Rate",
@@ -37,6 +44,8 @@ const stats = [
     icon: TrendingUp,
     color: "text-accent",
     bgColor: "bg-accent/10",
+    emoji: "📈",
+    financial: false,
   },
   {
     label: "Revenue",
@@ -46,6 +55,8 @@ const stats = [
     icon: DollarSign,
     color: "text-primary",
     bgColor: "bg-primary/10",
+    emoji: "💰",
+    financial: true,
   },
   {
     label: "Cities Covered",
@@ -55,19 +66,24 @@ const stats = [
     icon: MapPin,
     color: "text-chart-4",
     bgColor: "bg-chart-4/10",
+    emoji: "📍",
+    financial: false,
   },
 ]
 
 export function StatsOverview() {
+  const visible = stats.filter((s) => !s.financial || FLAGS.showFinancials)
+
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-      {stats.map((stat) => (
-        <Card key={stat.label}>
+    <div className={`grid gap-4 ${visible.length === 5 ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-5" : "grid-cols-2 md:grid-cols-3 lg:grid-cols-6"}`}>
+      {visible.map((stat) => (
+        <Card key={stat.label} className="hover:shadow-md transition-shadow">
           <CardContent className="p-4">
             <div className="flex items-start justify-between mb-3">
               <div className={`p-2 rounded-lg ${stat.bgColor}`}>
                 <stat.icon className={`w-4 h-4 ${stat.color}`} />
               </div>
+              <span className="text-lg">{stat.emoji}</span>
             </div>
             <div className="space-y-1">
               <p className="text-2xl font-bold text-foreground">{stat.value}</p>
