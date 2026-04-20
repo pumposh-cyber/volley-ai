@@ -1,7 +1,7 @@
-import Anthropic from "@anthropic-ai/sdk"
+import { GoogleGenAI } from "@google/genai"
 import { NextRequest } from "next/server"
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+const client = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY })
 
 // Static tournament context matching the NCVA Far Western 2026 booking
 const TOURNAMENT_CONTEXT = `
@@ -59,32 +59,25 @@ export async function POST(req: NextRequest) {
     ? SYSTEM_PROMPT + `\n\nActive team: ${teamName}${teamDivision ? ` — ${teamDivision}` : ""}`
     : SYSTEM_PROMPT
 
-  const messages: Anthropic.MessageParam[] = [
-    ...(history ?? []).slice(-10).map((h: { role: string; content: string }) => ({
-      role: h.role === "user" ? ("user" as const) : ("assistant" as const),
-      content: h.content,
-    })),
-    { role: "user" as const, content: message.trim() },
-  ]
+  // Build conversation prompt (Gemini doesn't have a separate system param in basic API)
+  let prompt = systemWithTeam + "\n\n"
+  for (const h of (history ?? []).slice(-10)) {
+    const role = h.role === "user" ? "Coach" : "VolleyAI"
+    prompt += `${role}: ${h.content}\n`
+  }
+  prompt += `Coach: ${message.trim()}\nVolleyAI:`
 
   const encoder = new TextEncoder()
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        const response = await client.messages.create({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 512,
-          system: systemWithTeam,
-          messages,
-          stream: true,
+        const response = await client.models.generateContentStream({
+          model: "gemini-2.5-flash",
+          contents: prompt,
         })
         for await (const chunk of response) {
-          if (
-            chunk.type === "content_block_delta" &&
-            chunk.delta.type === "text_delta"
-          ) {
-            controller.enqueue(encoder.encode(chunk.delta.text))
-          }
+          const text = chunk.text
+          if (text) controller.enqueue(encoder.encode(text))
         }
       } catch (err) {
         controller.enqueue(
