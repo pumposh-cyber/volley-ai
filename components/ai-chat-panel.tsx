@@ -2,10 +2,9 @@
 
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { 
-  X, 
-  Send, 
+import {
+  X,
+  Send,
   Sparkles,
   MapPin,
   Calendar,
@@ -13,15 +12,16 @@ import {
   CheckSquare,
   Hotel,
   MessageSquare,
-  User
+  User,
+  RotateCcw,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useApp } from "@/contexts/app-context"
 
 interface Message {
   id: string
   role: "user" | "assistant"
   content: string
-  timestamp: Date
 }
 
 interface AIChatPanelProps {
@@ -30,81 +30,122 @@ interface AIChatPanelProps {
 }
 
 const quickActions = [
-  { icon: TrendingUp, label: "Season overview", prompt: "Give me an overview of all my teams' performance this season" },
-  { icon: Calendar, label: "Schedule conflict", prompt: "Are there any scheduling conflicts for my teams this month?" },
-  { icon: MessageSquare, label: "Draft announcement", prompt: "Help me draft a parent announcement for NCVA Far Western" },
-  { icon: CheckSquare, label: "Tournament prep", prompt: "What's left to prepare for this weekend's tournament?" },
-  { icon: Hotel, label: "Booking status", prompt: "Show me hotel booking status for all upcoming tournaments" },
-  { icon: MapPin, label: "Travel logistics", prompt: "What travel logistics need attention this week?" },
+  { icon: CheckSquare,  label: "Packing list",      prompt: "Give me the full packing checklist for NCVA Far Western this weekend" },
+  { icon: Hotel,        label: "Hotel details",      prompt: "What are our hotel details for Far Western? Confirmation number, address, check-in time." },
+  { icon: MapPin,       label: "Venue & parking",    prompt: "Where should we park at RSCC Reno and what's the report time?" },
+  { icon: Calendar,     label: "Tournament prep",    prompt: "What do I still need to do to prepare for this weekend's tournament?" },
+  { icon: TrendingUp,   label: "Season overview",    prompt: "Give me a quick overview of our team's season so far" },
+  { icon: MessageSquare,label: "Parent announcement",prompt: "Draft a parent announcement for NCVA Far Western with key logistics" },
 ]
 
-const initialMessages: Message[] = [
-  {
-    id: "1",
-    role: "assistant",
-    content: "Hi Coach Andrew! I'm your VolleyAI assistant. I can see you have 3 tournaments coming up this month with 4 teams traveling. The NCVA Far Western is tomorrow - would you like me to review the prep status across all participating teams?",
-    timestamp: new Date(),
-  },
-]
+const WELCOME: Message = {
+  id: "0",
+  role: "assistant",
+  content: "Hi Coach! I'm your VolleyAI assistant. NCVA Far Western is Apr 17-19 at RSCC Reno — hotel is booked at Extended Stay America (conf 5601396408), car pickup Thu 12 PM at SJC Alamo. Ask me anything about prep, logistics, or your teams.",
+}
+
+function renderMarkdown(text: string) {
+  const parts: React.ReactNode[] = []
+  const lines = text.split("\n")
+  let key = 0
+  for (const line of lines) {
+    if (line.startsWith("- ") || line.startsWith("• ")) {
+      const content = line.replace(/^[-•]\s/, "")
+      parts.push(
+        <li key={key++} className="ml-4 list-disc">
+          {inlineMd(content)}
+        </li>
+      )
+    } else if (line.trim() === "") {
+      parts.push(<div key={key++} className="h-2" />)
+    } else {
+      parts.push(<p key={key++}>{inlineMd(line)}</p>)
+    }
+  }
+  return <>{parts}</>
+}
+
+function inlineMd(text: string): React.ReactNode {
+  const segments = text.split(/(\*\*[^*]+\*\*)/g)
+  return segments.map((seg, i) =>
+    seg.startsWith("**") && seg.endsWith("**")
+      ? <strong key={i}>{seg.slice(2, -2)}</strong>
+      : seg
+  )
+}
 
 export function AIChatPanel({ open, onClose }: AIChatPanelProps) {
-  const [messages, setMessages] = useState<Message[]>(initialMessages)
+  const { activeTeam } = useApp()
+  const [messages, setMessages] = useState<Message[]>([WELCOME])
   const [input, setInput] = useState("")
-  const [isTyping, setIsTyping] = useState(false)
+  const [streaming, setStreaming] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const abortRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
-    if (open && inputRef.current) {
-      inputRef.current.focus()
-    }
+    if (open) inputRef.current?.focus()
   }, [open])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
 
-  const handleSend = (content: string) => {
-    if (!content.trim()) return
+  const handleSend = async (content: string) => {
+    const text = content.trim()
+    if (!text || streaming) return
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: content.trim(),
-      timestamp: new Date(),
-    }
+    const userMsg: Message = { id: Date.now().toString(), role: "user", content: text }
+    const assistantId = (Date.now() + 1).toString()
+    const assistantMsg: Message = { id: assistantId, role: "assistant", content: "" }
 
-    setMessages((prev) => [...prev, userMessage])
+    setMessages((prev) => [...prev, userMsg, assistantMsg])
     setInput("")
-    setIsTyping(true)
+    setStreaming(true)
 
-    // Simulate AI response
-    setTimeout(() => {
-      const responses: Record<string, string> = {
-        "Give me an overview of all my teams' performance this season": 
-          "**Season Overview - Urban VBC**\n\n**Overall Record:** 99-35 (74% win rate)\n\n**By Team:**\n- 18U Premier: 24-8 (75%) - Power League leaders\n- 16U Elite: 18-6 (75%) - Strong serving team\n- 15U Thunder: 22-10 (69%) - Improving defense\n- 14U Lightning: 15-5 (75%) - Best setter rotation\n- 13U Storm: 12-4 (75%) - Great ball control\n- 12U Wave: 8-2 (80%) - Our rising stars!\n\n**Top Areas to Address:**\n1. 15U serve receive (78% efficiency)\n2. 16U middle blocking\n3. Cross-team communication drills\n\nWant me to generate a practice plan?",
-        "Are there any scheduling conflicts for my teams this month?":
-          "I found 2 potential conflicts:\n\n**Conflict 1 - Apr 16-19:**\n- 18U Premier AND 15U Thunder at NCVA Far Western\n- You'll need to split coaching staff\n- Recommendation: Coach Nina with 15U, you with 18U\n\n**Conflict 2 - Apr 27:**\n- 13U Storm has Club Classic\n- 16U Elite practice scheduled same day\n- Recommendation: Move 16U practice to Apr 26\n\n**Clear Weekends:**\n- Apr 20-21: Only 16U competing\n- May 4: Only 12U competing\n\nWould you like me to adjust the schedules?",
-        "Help me draft a parent announcement for NCVA Far Western":
-          "Here's a draft announcement:\n\n---\n\n**NCVA Far Western - Final Reminders**\n\nHi Urban Families!\n\nWe're heading to Reno tomorrow! Quick reminders:\n\n**Logistics:**\n- Hotel check-in: 3:00 PM Thursday\n- Day 1 report time: 6:45 AM (7:00 AM wave)\n- Venue: Reno-Sparks Convention Center\n\n**Pack List:**\n- 2 full uniforms (required)\n- Court shoes + backup pair\n- Kneepads, water bottle\n\n**Weather Alert:**\n- Check Donner Pass conditions before departing\n- 4x4 recommended if snow forecast\n\nAll confirmation numbers are in the app. Text me or Coach Nina with questions!\n\nGo Urban!\n- Coach Andrew\n\n---\n\nSend to 18U & 15U parents?",
-        "What's left to prepare for this weekend's tournament?":
-          "**Tournament Prep Status:**\n\n**NCVA Far Western (Tomorrow!)**\n\n18U Premier - 68% ready\n- Hotel: Booked\n- Car Rental: Booked\n- Missing: 4 parent waivers, 2 medical forms\n\n15U Thunder - 72% ready\n- Hotel: Booked\n- Car Rental: Booked  \n- Missing: 3 parent waivers\n\n**Critical Items:**\n1. Collect outstanding waivers TODAY\n2. Confirm carpool assignments\n3. Send final parent announcement\n4. Check road conditions in morning\n\nWant me to send waiver reminders to parents?",
-        "Show me hotel booking status for all upcoming tournaments":
-          "**Hotel Status - All Teams**\n\n**NCVA Far Western (Apr 16-19, Reno)**\n- 18U: Booked - Conf #5601396408\n- 15U: Booked - Conf #5601396412\n\n**Power League #4 (Apr 20-21, San Jose)**\n- 16U: No hotel needed (local)\n\n**Regional Qualifier (Apr 23-25, Anaheim)**\n- 14U: NOT BOOKED\n- Recommend: Marriott Anaheim ($159/night)\n- Action needed by Apr 18 for team rate\n\n**Club Classic (Apr 27, Fresno)**\n- 13U: NOT BOOKED\n- Recommend: Day trip or Hampton Inn ($129/night)\n\nWant me to start booking requests?",
-        "What travel logistics need attention this week?":
-          "**Logistics Requiring Attention:**\n\n**Urgent (Today):**\n1. Car rental pickup - Tomorrow 12:00 PM\n2. Confirm 15U carpool drivers (2 families unassigned)\n3. Send parking instructions (Lot C, Gate 5-6)\n\n**This Week:**\n4. Book 14U hotel for Anaheim (Apr 23-25)\n5. Collect tournament fees - $1,480 outstanding\n6. Request team room block for Fresno\n\n**Carpool Status:**\n- 18U: 12/12 players assigned\n- 15U: 10/12 players assigned (need 2 more seats)\n\nI can send automated reminders to the 2 unassigned 15U families. Want me to do that?",
+    const history = messages.map((m) => ({ role: m.role, content: m.content }))
+    abortRef.current = new AbortController()
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: text,
+          history,
+          teamName: activeTeam?.shortName,
+          teamDivision: activeTeam?.division,
+        }),
+        signal: abortRef.current.signal,
+      })
+
+      const reader = res.body?.getReader()
+      const decoder = new TextDecoder()
+      if (!reader) throw new Error("No stream")
+
+      let accumulated = ""
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        accumulated += decoder.decode(value, { stream: true })
+        const snap = accumulated
+        setMessages((prev) =>
+          prev.map((m) => (m.id === assistantId ? { ...m, content: snap } : m))
+        )
       }
-
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: responses[content] || "I can help you with tournament preparation, travel logistics, team communication, and performance tracking. What would you like to know?",
-        timestamp: new Date(),
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name !== "AbortError") {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantId
+              ? { ...m, content: "Sorry, I couldn't connect. Check that ANTHROPIC_API_KEY is set." }
+              : m
+          )
+        )
       }
-
-      setMessages((prev) => [...prev, assistantMessage])
-      setIsTyping(false)
-    }, 1500)
+    } finally {
+      setStreaming(false)
+    }
   }
 
   if (!open) return null
@@ -123,9 +164,19 @@ export function AIChatPanel({ open, onClose }: AIChatPanelProps) {
               <p className="text-xs text-muted-foreground">Tournament planning & prep</p>
             </div>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setMessages([WELCOME])}
+              title="Clear chat"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={onClose}>
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
 
         {/* Messages */}
@@ -133,15 +184,16 @@ export function AIChatPanel({ open, onClose }: AIChatPanelProps) {
           {messages.map((message) => (
             <div
               key={message.id}
-              className={cn(
-                "flex gap-3",
-                message.role === "user" ? "flex-row-reverse" : ""
-              )}
+              className={cn("flex gap-3", message.role === "user" ? "flex-row-reverse" : "")}
             >
-              <div className={cn(
-                "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
-                message.role === "assistant" ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground"
-              )}>
+              <div
+                className={cn(
+                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
+                  message.role === "assistant"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-foreground"
+                )}
+              >
                 {message.role === "assistant" ? (
                   <Sparkles className="h-4 w-4" />
                 ) : (
@@ -150,30 +202,24 @@ export function AIChatPanel({ open, onClose }: AIChatPanelProps) {
               </div>
               <div
                 className={cn(
-                  "max-w-[80%] rounded-2xl px-4 py-3 text-sm",
+                  "max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed",
                   message.role === "user"
                     ? "rounded-tr-none bg-primary text-primary-foreground"
                     : "rounded-tl-none bg-secondary text-secondary-foreground"
                 )}
               >
-                <div className="whitespace-pre-wrap leading-relaxed">{message.content}</div>
+                {message.content ? (
+                  <div className="space-y-0.5">{renderMarkdown(message.content)}</div>
+                ) : (
+                  <div className="flex gap-1">
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.3s]" />
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.15s]" />
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground" />
+                  </div>
+                )}
               </div>
             </div>
           ))}
-          {isTyping && (
-            <div className="flex gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <Sparkles className="h-4 w-4" />
-              </div>
-              <div className="rounded-2xl rounded-tl-none bg-secondary px-4 py-3">
-                <div className="flex gap-1">
-                  <span className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.3s]" />
-                  <span className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.15s]" />
-                  <span className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground" />
-                </div>
-              </div>
-            </div>
-          )}
           <div ref={messagesEndRef} />
         </div>
 
@@ -187,6 +233,7 @@ export function AIChatPanel({ open, onClose }: AIChatPanelProps) {
                 size="sm"
                 className="flex-shrink-0 gap-1.5 text-xs"
                 onClick={() => handleSend(action.prompt)}
+                disabled={streaming}
               >
                 <action.icon className="h-3 w-3" />
                 {action.label}
@@ -211,8 +258,14 @@ export function AIChatPanel({ open, onClose }: AIChatPanelProps) {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask about your tournament, travel, or team..."
               className="flex-1 rounded-xl border border-border bg-secondary/50 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+              disabled={streaming}
             />
-            <Button type="submit" size="icon" className="h-12 w-12 rounded-xl" disabled={!input.trim() || isTyping}>
+            <Button
+              type="submit"
+              size="icon"
+              className="h-12 w-12 rounded-xl"
+              disabled={!input.trim() || streaming}
+            >
               <Send className="h-5 w-5" />
             </Button>
           </div>
