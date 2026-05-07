@@ -70,7 +70,7 @@ interface TM2Data {
 
 const REFRESH_INTERVAL = 60_000 // 60s
 
-export function LiveSchedule({ onStatusChange }: { onStatusChange?: (isActive: boolean, team?: { division: string; eventDates: string }) => void } = {}) {
+export function LiveSchedule({ onStatusChange }: { onStatusChange?: (isActive: boolean, team?: { division: string; eventDates: string; eventName: string }) => void } = {}) {
   const { state, dispatch, activeTeam } = useApp()
   const cached = state.scheduleCache
 
@@ -112,7 +112,7 @@ export function LiveSchedule({ onStatusChange }: { onStatusChange?: (isActive: b
       else if (next && !expandedId) setExpandedId(next.id)
       // Notify parent whether tournament is still active
       const isActive = json.matches.some((m) => m.status === "in-progress" || m.status === "upcoming")
-      onStatusChange?.(isActive, { division: json.team.division, eventDates: json.team.eventDates })
+      onStatusChange?.(isActive, { division: json.team.division, eventDates: json.team.eventDates, eventName: json.team.eventName })
     } catch (e) {
       // Fall back to cache if available
       if (cached) {

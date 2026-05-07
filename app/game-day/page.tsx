@@ -26,7 +26,7 @@ export default function GameDayPage() {
   const [showShareBanner, setShowShareBanner] = useState(false)
   // null = loading (don't show either state), true = active, false = completed
   const [tournamentActive, setTournamentActive] = useState<boolean | null>(null)
-  const [tournamentMeta, setTournamentMeta] = useState<{ division: string; eventDates: string } | null>(null)
+  const [tournamentMeta, setTournamentMeta] = useState<{ division: string; eventDates: string; eventName: string } | null>(null)
 
   const handleShare = () => {
     setShowShareBanner(true)
@@ -57,7 +57,9 @@ export default function GameDayPage() {
             </div>
             <div className="text-center">
               <h1 className="text-sm font-bold text-foreground leading-tight">Game Day Mode</h1>
-              <p className="text-[10px] text-muted-foreground">UVAC · Far Westerns Wk 2</p>
+              <p className="text-[10px] text-muted-foreground">
+                {tournamentMeta ? `${tournamentMeta.division} · ${tournamentMeta.eventDates}` : "UVAC 15 TS"}
+              </p>
             </div>
           </div>
 
@@ -97,7 +99,7 @@ export default function GameDayPage() {
                 {tournamentActive ? "LIVE" : "COMPLETED"} · {tournamentMeta?.division ?? "15 No Dinx"} · {tournamentMeta?.eventDates ?? ""}
               </span>
             </div>
-            <span className="text-xs text-muted-foreground">UVAC 15 TS</span>
+            <span className="text-xs text-muted-foreground">{tournamentMeta?.eventName ?? "UVAC 15 TS"}</span>
           </div>
         )}
       </header>
@@ -152,7 +154,7 @@ export default function GameDayPage() {
               teamName="UVAC Urban Volleyball 15 TS"
               opponent="LAVA West 15 Premier CA"
             />
-            <TeamMatchupCard />
+            <TeamMatchupCard meta={tournamentMeta} />
           </TabsContent>
 
           <TabsContent value="rankings" className="p-4 mt-0 focus-visible:outline-none">
@@ -177,19 +179,19 @@ export default function GameDayPage() {
   )
 }
 
-function TeamMatchupCard() {
+function TeamMatchupCard({ meta }: { meta: { division: string; eventDates: string; eventName: string } | null }) {
+  const rows = [
+    { label: "Tournament", value: meta?.eventName ?? "—" },
+    { label: "Dates",      value: meta?.eventDates ?? "—" },
+    { label: "Venue",      value: "Courtside Sports, Manteca" },
+    { label: "Division",   value: meta?.division ?? "—"    },
+    { label: "Format",     value: "Best of 3 Sets"          },
+  ]
   return (
     <div className="mt-4 rounded-xl border border-border bg-card p-4">
       <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Match Details</p>
       <div className="grid grid-cols-2 gap-3 text-sm">
-        {[
-          { label: "Tournament", value: "NCVA Far Westerns Wk 2" },
-          { label: "Dates",      value: "Apr 17-19, 2026"        },
-          { label: "Venue",      value: "RSCC 47, Reno"          },
-          { label: "Division",   value: "15 No Dinx"             },
-          { label: "Format",     value: "Best of 3 Sets"         },
-          { label: "Head Coach", value: "Tamara Robertson"       },
-        ].map(({ label, value }) => (
+        {rows.map(({ label, value }) => (
           <div key={label}>
             <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</p>
             <p className="font-medium text-foreground">{value}</p>
