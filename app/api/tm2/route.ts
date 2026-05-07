@@ -1,9 +1,20 @@
 import { NextResponse } from "next/server"
 
 const TM2_BASE = "https://tm2sign.com/api/public"
-const EVENT_ID = 2170
-const DIVISION_ID = 10559
-const OUR_TEAM_ID = 266815
+
+// Parse IDs from a TM2 team URL like:
+// https://tm2sign.com/app/event/2136/division/10253/team/249056
+// Set TM2_TEAM_URL in Vercel env vars to update without code changes.
+function parseTeamUrl(url: string) {
+  const m = url.match(/event\/(\d+)\/division\/(\d+)\/team\/(\d+)/)
+  if (!m) return null
+  return { eventId: +m[1], divisionId: +m[2], teamId: +m[3] }
+}
+
+const parsed = process.env.TM2_TEAM_URL ? parseTeamUrl(process.env.TM2_TEAM_URL) : null
+const EVENT_ID   = parsed?.eventId   ?? 2136
+const DIVISION_ID = parsed?.divisionId ?? 10253
+const OUR_TEAM_ID = parsed?.teamId    ?? 249056
 
 interface TM2Match {
   id: number
@@ -219,8 +230,8 @@ export async function GET() {
         identifier: ourTeam?.alternate_identifier ?? "G15UVBAC1NC",
         seed: ourTeam?.starting_seed_number,
         division: "15 No Dinx",
-        eventName: "2026 No Dinx/NCVA Girls Far Western Nat'l Qualifier - Wk 2",
-        eventDates: "Apr 17-19, 2026",
+        eventName: "NCVA Girls Far Western Nat'l Qualifier 2026",
+        eventDates: "May 2026",
       },
       matches: shapedMatches,
       standings,
