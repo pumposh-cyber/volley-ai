@@ -5,73 +5,27 @@ import {
   MapPin,
   Utensils,
   ParkingCircle,
-  Stethoscope,
   Info,
-  Bus,
-  Users,
-  PackageSearch,
   ExternalLink,
   Navigation,
-  Tent,
   Coffee,
-  ShoppingCart,
 } from "lucide-react"
 
-const PARKING_LOTS = [
-  { name: "Lot C ⭐ Best",    spaces: "916", note: "Gates 5 & 6 · Largest lot",          best: true  },
-  { name: "Lot B / B1 / B2", spaces: "751", note: "West side · Peckham Ln",              best: false },
-  { name: "Lot E / F",       spaces: "378", note: "East side · Gate 4",                  best: false },
-  { name: "Lot A",           spaces: "111", note: "Gate 1 · South Virginia St",          best: false },
-]
-
-const FOOD_ONSITE = [
-  { item: "Pizza",            where: "Section B Food Court" },
-  { item: "Burgers & Hotdogs",where: "Section B Food Court" },
-  { item: "Chicken Tenders",  where: "Section B Food Court" },
-]
-
 const FOOD_NEARBY = [
-  { name: "In-N-Out Burger",  distance: "0.5 mi",  note: "705 S Virginia St · drive-thru" },
-  { name: "Starbucks",        distance: "0.3 mi",  note: "4825 Kietzke Ln" },
-  { name: "Costco Food Court",distance: "1.2 mi",  note: "Bulk snacks for the team" },
-  { name: "Raising Cane's",   distance: "0.8 mi",  note: "S Virginia St" },
-  { name: "Panda Express",    distance: "0.6 mi",  note: "S Virginia St" },
-]
-
-const TAILGATE_SPOTS = [
-  {
-    name: "Lot C – North End",
-    note: "Best tailgate zone · Gates 5 & 6 · Space for chairs, canopies, and team camp setup",
-    best: true,
-  },
-  {
-    name: "Convention Center Plaza",
-    note: "Main entrance area · Covered outdoor seating · Good for parents between matches",
-    best: false,
-  },
-  {
-    name: "Lot B East Side",
-    note: "Quieter area · Peckham Ln entrance · Some shade",
-    best: false,
-  },
-]
-
-const VENUE_SECTIONS = [
-  { icon: Info,         label: "Registration & Tickets",  detail: "Hall 1-2-3 zone · Main Entrance off South Virginia St",                     color: "text-primary"       },
-  { icon: Users,        label: "Players Lounge",           detail: "Section E (yellow on map) · Tables & chairs, first-come",                   color: "text-chart-3"       },
-  { icon: Navigation,   label: "Coaches Hospitality",      detail: "Section D (orange on map)",                                                  color: "text-chart-4"       },
-  { icon: Users,        label: "Parents Lounge",           detail: "Upper level via elevator (purple dot on map)",                               color: "text-chart-5"       },
-  { icon: Stethoscope,  label: "Medical Stations",         detail: "Near Court 40 area & near Courts 21–22 (red dots on map)",                  color: "text-destructive"   },
-  { icon: PackageSearch,label: "Lost & Found",             detail: "Registration Lobby area (green dot on map)",                                 color: "text-muted-foreground" },
-  { icon: Bus,          label: "Bus / Taxi Drop-off",      detail: "South side of building",                                                     color: "text-muted-foreground" },
+  { name: "In-N-Out Burger",   distance: "0.8 mi",  note: "Quick drive-thru — go early" },
+  { name: "Raising Cane's",    distance: "1.0 mi",  note: "Chicken fingers, great for teams" },
+  { name: "Chick-fil-A",       distance: "1.2 mi",  note: "Fastest breakfast / lunch option" },
+  { name: "Chipotle",          distance: "1.1 mi",  note: "Good for post-match fuel" },
+  { name: "Five Guys",         distance: "1.4 mi",  note: "2140 Daniels St" },
+  { name: "Panda Express",     distance: "1.3 mi",  note: "1467 Hulsey Way" },
 ]
 
 const COACH_TIPS = [
-  { icon: "✅", text: "Lot C is the go-to — arrive before 6:45 AM for AM wave parking" },
-  { icon: "✅", text: "Set up team camp in Lot C north end; bring canopy and folding chairs" },
-  { icon: "✅", text: "Food court on-site (pizza, burgers, chicken tenders) · Cash & card" },
-  { icon: "⚠️", text: "Check Donner Summit / I-80 road conditions the night before" },
-  { icon: "🚗", text: "AWD/4×4 recommended if snow is forecast on summit" },
+  { icon: "✅", text: "Free surface parking directly around the building — arrive 15 min early for weekend tournaments" },
+  { icon: "✅", text: "Courtside Sports is fully indoor & climate controlled — no weather concerns" },
+  { icon: "✅", text: "Pack lunch for Day 1 — nearby spots get crowded at peak hours" },
+  { icon: "✅", text: "Courtside 2 & 3 are the main match courts for this event" },
+  { icon: "🚗", text: "From Bay Area: I-580 E → I-205 E → CA-120 E → Airport Way, Manteca (~1h 20min)" },
 ]
 
 export function VenueGuide() {
@@ -82,14 +36,15 @@ export function VenueGuide() {
       <div className="rounded-xl border border-border bg-card p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="font-bold text-foreground">Reno-Sparks Convention Center</p>
+            <p className="font-bold text-foreground">Courtside Sports Manteca</p>
             <div className="flex items-center gap-1.5 mt-1">
               <MapPin className="w-3.5 h-3.5 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">4590 S Virginia St, Reno, NV 89502</span>
+              <span className="text-sm text-muted-foreground">450 Commerce Ct, Manteca, CA 95336</span>
             </div>
+            <p className="text-xs text-muted-foreground mt-0.5">(209) 399-2200</p>
           </div>
           <a
-            href="https://maps.google.com/?q=Reno+Sparks+Convention+Center"
+            href="https://maps.google.com/?q=Courtside+Sports+450+Commerce+Ct+Manteca+CA"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1 text-xs text-primary shrink-0 mt-1"
@@ -100,7 +55,7 @@ export function VenueGuide() {
         </div>
         <div className="flex gap-2 mt-3 flex-wrap">
           <a
-            href="https://maps.google.com/maps?saddr=current+location&daddr=Reno+Sparks+Convention+Center"
+            href="https://maps.google.com/maps?saddr=current+location&daddr=450+Commerce+Ct+Manteca+CA+95336"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 text-xs bg-primary/10 text-primary px-3 py-1.5 rounded-full font-medium"
@@ -109,7 +64,7 @@ export function VenueGuide() {
             Google Maps
           </a>
           <a
-            href="https://waze.com/ul?q=Reno+Sparks+Convention+Center&navigate=yes"
+            href="https://waze.com/ul?q=Courtside+Sports+Manteca&navigate=yes"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 text-xs bg-accent/10 text-accent px-3 py-1.5 rounded-full font-medium"
@@ -126,29 +81,21 @@ export function VenueGuide() {
           <ParkingCircle className="w-4 h-4 text-primary" />
           <p className="text-sm font-semibold text-foreground">Parking</p>
         </div>
-        <div className="divide-y divide-border">
-          {PARKING_LOTS.map((lot) => (
-            <div
-              key={lot.name}
-              className={cn(
-                "flex items-center justify-between px-4 py-3",
-                lot.best && "bg-accent/5"
-              )}
-            >
-              <div>
-                <p className={cn("text-sm font-semibold", lot.best ? "text-accent" : "text-foreground")}>
-                  {lot.name}
-                </p>
-                <p className="text-xs text-muted-foreground">{lot.note}</p>
-              </div>
-              <p className={cn("text-sm font-bold tabular-nums shrink-0", lot.best ? "text-accent" : "text-muted-foreground")}>
-                {lot.spaces}
-              </p>
+        <div className="px-4 py-4 space-y-2">
+          <div className="flex items-start gap-3 bg-accent/5 rounded-lg p-3">
+            <span className="text-accent font-bold text-sm shrink-0">★ Free</span>
+            <div>
+              <p className="text-sm font-semibold text-foreground">Facility Surface Lot</p>
+              <p className="text-xs text-muted-foreground">Free parking around the building · arrive 15 min early on tournament mornings</p>
             </div>
-          ))}
-        </div>
-        <div className="px-4 py-3 bg-muted/20 border-t border-border">
-          <p className="text-xs text-muted-foreground font-medium">⏰ Arrive before 6:45 AM for AM wave parking</p>
+          </div>
+          <div className="flex items-start gap-3 rounded-lg p-3">
+            <span className="text-muted-foreground font-bold text-sm shrink-0">+</span>
+            <div>
+              <p className="text-sm font-medium text-foreground">Commerce Ct Street Parking</p>
+              <p className="text-xs text-muted-foreground">Additional overflow along Commerce Ct</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -156,23 +103,8 @@ export function VenueGuide() {
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         <div className="px-4 py-3 bg-muted/40 border-b border-border flex items-center gap-2">
           <Utensils className="w-4 h-4 text-accent" />
-          <p className="text-sm font-semibold text-foreground">Food</p>
+          <p className="text-sm font-semibold text-foreground">Food Nearby</p>
         </div>
-
-        {/* On-site */}
-        <div className="px-4 py-3 bg-muted/10 border-b border-border">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mb-2">Inside Venue · Section B</p>
-          <div className="flex flex-wrap gap-2">
-            {FOOD_ONSITE.map(({ item }) => (
-              <span key={item} className="text-xs bg-accent/10 text-accent px-2.5 py-1 rounded-full font-medium">
-                {item}
-              </span>
-            ))}
-          </div>
-          <p className="text-[11px] text-muted-foreground mt-2">Cash & card accepted</p>
-        </div>
-
-        {/* Nearby */}
         <div className="divide-y divide-border">
           {FOOD_NEARBY.map(({ name, distance, note }) => (
             <div key={name} className="flex items-center justify-between px-4 py-3">
@@ -184,39 +116,23 @@ export function VenueGuide() {
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Tailgate */}
-      <div className="rounded-xl border border-border bg-card overflow-hidden">
-        <div className="px-4 py-3 bg-muted/40 border-b border-border flex items-center gap-2">
-          <Tent className="w-4 h-4 text-chart-3" />
-          <p className="text-sm font-semibold text-foreground">Team Camp / Tailgate</p>
-        </div>
-        <div className="divide-y divide-border">
-          {TAILGATE_SPOTS.map((spot) => (
-            <div
-              key={spot.name}
-              className={cn("px-4 py-3", spot.best && "bg-chart-3/5")}
-            >
-              <p className={cn("text-sm font-semibold", spot.best ? "text-chart-3" : "text-foreground")}>
-                {spot.name}
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{spot.note}</p>
-            </div>
-          ))}
-        </div>
         <div className="px-4 py-3 bg-muted/20 border-t border-border">
-          <p className="text-xs text-muted-foreground">Bring: canopy tent · folding chairs · cooler · team snacks</p>
+          <p className="text-xs text-muted-foreground">⏰ Pack lunch for Day 1 — nearby spots get busy at tournament peak hours</p>
         </div>
       </div>
 
-      {/* Venue quick reference */}
+      {/* Venue info */}
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         <div className="px-4 py-3 bg-muted/40 border-b border-border">
           <p className="text-sm font-semibold text-foreground">Inside the Venue</p>
         </div>
         <div className="divide-y divide-border">
-          {VENUE_SECTIONS.map(({ icon: Icon, label, detail, color }) => (
+          {[
+            { icon: Info,   label: "Courts",        detail: "Indoor climate-controlled courts · Courtside 2 & 3 for this event", color: "text-primary" },
+            { icon: Info,   label: "Seating",        detail: "Bleacher seating along court perimeters",                          color: "text-chart-3" },
+            { icon: Info,   label: "Restrooms",      detail: "Located near main entrance",                                       color: "text-muted-foreground" },
+            { icon: Coffee, label: "Concessions",    detail: "Check facility on-site — bring snacks & water as backup",         color: "text-accent" },
+          ].map(({ icon: Icon, label, detail, color }) => (
             <div key={label} className="flex items-start gap-3 px-4 py-3">
               <Icon className={cn("w-4 h-4 mt-0.5 shrink-0", color)} />
               <div>
@@ -228,30 +144,31 @@ export function VenueGuide() {
         </div>
       </div>
 
-      {/* Road conditions */}
+      {/* Directions note */}
       <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
-        <p className="text-xs font-semibold text-primary mb-2">Road Conditions · I-80</p>
+        <p className="text-xs font-semibold text-primary mb-2">Driving from Bay Area</p>
         <p className="text-sm text-muted-foreground mb-3">
-          Check Donner Summit conditions before driving. AWD/4×4 recommended if snow is forecast.
+          I-580 E → I-205 E → CA-120 E → Airport Way. About 1h 20min from the East Bay.
+          No mountain passes — straightforward drive.
         </p>
         <div className="flex gap-2 flex-wrap">
           <a
-            href="https://quickmap.dot.ca.gov"
+            href="https://maps.google.com/maps?saddr=current+location&daddr=450+Commerce+Ct+Manteca+CA+95336"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 text-xs bg-primary/10 text-primary px-3 py-1.5 rounded-full font-medium"
           >
             <Navigation className="w-3 h-3" />
-            CalTrans QuickMap
+            Get Directions
           </a>
           <a
-            href="https://www.accuweather.com/en/us/reno/89501/weather-forecast/330699"
+            href="https://www.accuweather.com/en/us/manteca/95336/weather-forecast/339573"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 text-xs bg-muted text-muted-foreground px-3 py-1.5 rounded-full font-medium"
           >
             <Coffee className="w-3 h-3" />
-            Reno Weather
+            Manteca Weather
           </a>
         </div>
       </div>

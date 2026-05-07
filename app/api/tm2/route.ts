@@ -1,9 +1,20 @@
 import { NextResponse } from "next/server"
 
 const TM2_BASE = "https://tm2sign.com/api/public"
-const EVENT_ID = 2170
-const DIVISION_ID = 10559
-const OUR_TEAM_ID = 266815
+
+// Parse IDs from a TM2 team URL like:
+// https://tm2sign.com/app/event/2136/division/10253/team/249056
+// Set TM2_TEAM_URL in Vercel env vars to update without code changes.
+function parseTeamUrl(url: string) {
+  const m = url.match(/event\/(\d+)\/division\/(\d+)\/team\/(\d+)/)
+  if (!m) return null
+  return { eventId: +m[1], divisionId: +m[2], teamId: +m[3] }
+}
+
+const parsed = process.env.TM2_TEAM_URL ? parseTeamUrl(process.env.TM2_TEAM_URL) : null
+const EVENT_ID   = parsed?.eventId   ?? 2136
+const DIVISION_ID = parsed?.divisionId ?? 10253
+const OUR_TEAM_ID = parsed?.teamId    ?? 249056
 
 interface TM2Match {
   id: number
@@ -64,7 +75,7 @@ async function fetchTM2<T>(path: string): Promise<T> {
 export async function GET() {
   try {
     // Fetch matches for our team
-    const [matches, allTeams, courts, rounds] = await Promise.all([
+    const [matches, allTeams, courts, rounds, eventInfo, divisionInfo] = await Promise.all([
       fetchTM2<TM2Match[]>(
         `scheduler-matches?filter%5Bevent_id%5D=${EVENT_ID}&filter%5Bteam_id%5D=${OUR_TEAM_ID}`
       ),
@@ -77,6 +88,10 @@ export async function GET() {
       fetchTM2<{ id: number; name: string; abbreviation: string; round_type: string }[]>(
         `scheduler-rounds?filter%5Bevent_id%5D=${EVENT_ID}&filter%5Bevent_division_id%5D=${DIVISION_ID}`
       ),
+      fetchTM2<{ id: number; name: string; timezone: string }>(`events/${EVENT_ID}`).catch(() => null),
+      fetchTM2<{ id: number; name: string }[]>(
+        `event-divisions?filter%5Bevent_id%5D=${EVENT_ID}`
+      ).catch(() => null),
     ])
 
     // Build lookup maps
@@ -176,6 +191,9 @@ export async function GET() {
 
       const roundInfo = rounds.find((r) => r.id === m.scheduler_round_id)
 
+      const courtBase = court?.custom_name || court?.name || `Court ${m.scheduler_court_id}`
+      const courtLoc = court?.location || ""
+
       return {
         id: m.id,
         friendlyLabel: m.friendly_label,
@@ -185,8 +203,8 @@ export async function GET() {
         matchOrder: m.match_order,
         court: {
           id: m.scheduler_court_id,
-          name: court?.custom_name ?? court?.name ?? `Court ${m.scheduler_court_id}`,
-          location: court?.location ?? "",
+          name: courtLoc && !courtBase.includes(courtLoc) ? `${courtBase} · ${courtLoc}` : courtBase,
+          location: courtLoc,
         },
         round: {
           id: m.scheduler_round_id,
@@ -212,15 +230,29 @@ export async function GET() {
       }
     }).sort((a, b) => a.startTime - b.startTime)
 
+    // Compute next match date range from actual match data
+    const tz = eventInfo?.timezone ?? "America/Los_Angeles"
+    const now = Date.now() / 1000
+    const upcoming = shapedMatches.filter((m) => m.startTime > now - 3600)
+    const nextDate = upcoming.length > 0 ? upcoming[0].startTime : null
+    const eventDates = nextDate
+      ? new Date(nextDate * 1000).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+          timeZone: tz,
+        })
+      : "May 2026"
+
     return NextResponse.json({
       team: {
         id: OUR_TEAM_ID,
         name: ourTeam?.name ?? "UVAC Urban Volleyball 15 TS",
         identifier: ourTeam?.alternate_identifier ?? "G15UVBAC1NC",
         seed: ourTeam?.starting_seed_number,
-        division: "15 No Dinx",
-        eventName: "2026 No Dinx/NCVA Girls Far Western Nat'l Qualifier - Wk 2",
-        eventDates: "Apr 17-19, 2026",
+        division: divisionInfo?.find((d) => d.id === DIVISION_ID)?.name ?? "15",
+        eventName: eventInfo?.name ?? "NCVA Girls Power League",
+        eventDates,
       },
       matches: shapedMatches,
       standings,

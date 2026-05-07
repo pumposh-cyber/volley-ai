@@ -70,7 +70,7 @@ interface TM2Data {
 
 const REFRESH_INTERVAL = 60_000 // 60s
 
-export function LiveSchedule() {
+export function LiveSchedule({ onStatusChange }: { onStatusChange?: (isActive: boolean, team?: { division: string; eventDates: string; eventName: string }) => void } = {}) {
   const { state, dispatch, activeTeam } = useApp()
   const cached = state.scheduleCache
 
@@ -110,6 +110,9 @@ export function LiveSchedule() {
       const next = json.matches.find((m) => m.status === "upcoming")
       if (live) setExpandedId(live.id)
       else if (next && !expandedId) setExpandedId(next.id)
+      // Notify parent whether tournament is still active
+      const isActive = json.matches.some((m) => m.status === "in-progress" || m.status === "upcoming")
+      onStatusChange?.(isActive, { division: json.team.division, eventDates: json.team.eventDates, eventName: json.team.eventName })
     } catch (e) {
       // Fall back to cache if available
       if (cached) {
@@ -128,9 +131,12 @@ export function LiveSchedule() {
 
   useEffect(() => {
     fetchData()
+    // Don't poll if tournament is already over (all matches completed)
+    const hasFutureMatches = !data || data.matches.some((m) => m.status === "upcoming" || m.status === "in-progress")
+    if (!hasFutureMatches) return
     const interval = setInterval(fetchData, REFRESH_INTERVAL)
     return () => clearInterval(interval)
-  }, [fetchData])
+  }, [fetchData]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) {
     return (
