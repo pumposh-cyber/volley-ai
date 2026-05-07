@@ -12,11 +12,19 @@ import { QuickActions } from "@/components/quick-actions"
 import { AIChatPanel } from "@/components/ai-chat-panel"
 import { Button } from "@/components/ui/button"
 import { Zap, ArrowRight, Sparkles, X, Megaphone, Volleyball, Calendar, MapPin } from "lucide-react"
+import { useApp } from "@/contexts/app-context"
 
 export default function CoachDashboard() {
+  const { state } = useApp()
   const [chatOpen, setChatOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [showGameDayBanner, setShowGameDayBanner] = useState(true)
+
+  // Only show the LIVE banner if the schedule cache has upcoming/in-progress matches
+  const cachedMatches = (state.scheduleCache?.data as { matches?: { status: string }[] } | undefined)?.matches
+  const tournamentIsLive = !cachedMatches || cachedMatches.some(
+    (m) => m.status === "upcoming" || m.status === "in-progress"
+  )
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -27,8 +35,8 @@ export default function CoachDashboard() {
       <div className="flex-1 flex flex-col min-w-0">
         <DashboardHeader onOpenChat={() => setChatOpen(true)} />
 
-        {/* LIVE Game Day Banner */}
-        {showGameDayBanner && (
+        {/* Game Day Banner — only shown when tournament is live */}
+        {showGameDayBanner && tournamentIsLive && (
           <div className="relative bg-gradient-to-r from-accent/90 to-primary/90 text-white px-6 py-3 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <span className="relative flex h-3 w-3">
@@ -36,7 +44,7 @@ export default function CoachDashboard() {
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-white" />
               </span>
               <p className="text-sm font-semibold">
-                LIVE NOW · UVAC 15 TS at NCVA Far Western Wk2 · Apr 17-19 · RSCC Reno
+                LIVE NOW · UVAC 15 TS · Next matches upcoming · RSCC Reno
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">

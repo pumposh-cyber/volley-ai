@@ -24,6 +24,9 @@ import { cn } from "@/lib/utils"
 export default function GameDayPage() {
   const [activeTab, setActiveTab] = useState("schedule")
   const [showShareBanner, setShowShareBanner] = useState(false)
+  // null = loading (don't show either state), true = active, false = completed
+  const [tournamentActive, setTournamentActive] = useState<boolean | null>(null)
+  const [tournamentMeta, setTournamentMeta] = useState<{ division: string; eventDates: string } | null>(null)
 
   const handleShare = () => {
     setShowShareBanner(true)
@@ -70,17 +73,33 @@ export default function GameDayPage() {
           </div>
         </div>
 
-        {/* Live status strip */}
-        <div className="flex items-center justify-between bg-accent/10 border-t border-accent/20 px-4 py-2">
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-accent" />
-            </span>
-            <span className="text-xs font-semibold text-accent">LIVE · 15 No Dinx · Apr 17-19</span>
+        {/* Live status strip — driven by TM2 match data */}
+        {tournamentActive !== null && (
+          <div className={cn(
+            "flex items-center justify-between border-t px-4 py-2",
+            tournamentActive
+              ? "bg-accent/10 border-accent/20"
+              : "bg-muted/40 border-border"
+          )}>
+            <div className="flex items-center gap-2">
+              {tournamentActive ? (
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-accent" />
+                </span>
+              ) : (
+                <span className="inline-flex rounded-full h-2.5 w-2.5 bg-muted-foreground/40" />
+              )}
+              <span className={cn(
+                "text-xs font-semibold",
+                tournamentActive ? "text-accent" : "text-muted-foreground"
+              )}>
+                {tournamentActive ? "LIVE" : "COMPLETED"} · {tournamentMeta?.division ?? "15 No Dinx"} · {tournamentMeta?.eventDates ?? ""}
+              </span>
+            </div>
+            <span className="text-xs text-muted-foreground">UVAC 15 TS</span>
           </div>
-          <span className="text-xs text-muted-foreground">UVAC 15 TS</span>
-        </div>
+        )}
       </header>
 
       {/* Share toast */}
@@ -118,7 +137,10 @@ export default function GameDayPage() {
 
         <div className="flex-1 overflow-y-auto">
           <TabsContent value="schedule" className="p-4 mt-0 focus-visible:outline-none">
-            <LiveSchedule />
+            <LiveSchedule onStatusChange={(active, meta) => {
+              setTournamentActive(active)
+              if (meta) setTournamentMeta(meta)
+            }} />
           </TabsContent>
 
           <TabsContent value="venue" className="p-4 mt-0 focus-visible:outline-none">
